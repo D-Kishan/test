@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        class Account{
+            constructor(name,AccNo,Amount){
+                this.Name =name;
+                this.AccNo =AccNo;
+                this.Amount =Amount; 
+            }
+
+            Deposits(amount){
+                this.Amount = this.Amount + amount;
+            }
+            GetBalance(){
+                return this.Amount;
+            }
+            Widthdrawl(amount){
+                if((this.Amount - amount) >= 0){
+                    this.Amount = this.Amount - amount;
+                    return true;
+                }
+                return false;
+            }
+
+        }
+
+        class Bank{
+             
+             constructor(){
+                this.AccountList =[];
+                this.AccountList.push(new Account("Pravin",101,1000));
+                this.AccountList.push(new Account("ravi",102,1000));
+                this.AccountList.push(new Account("Naveen",103,1000));
+                this.AccountList.push(new Account("hari",104,1000));
+             }
+
+             Deposits(AccNo,Amount){
+                let acc = this.FindAccount(AccNo);
+                acc.Deposits(Amount);
+                return acc;
+             }
+
+             Widthdrawl(AccNo,Amount){
+                let acc =this.FindAccount(AccNo);
+                acc.Widthdrawl(Amount);
+                return acc;
+             }
+
+             Transfer(fromAcc , ToAcc, Amount){
+                let from =this.FindAccount(fromAcc);
+                let to =this.FindAccount(ToAcc);
+                if(from.Widthdrawl(Amount)){
+                    to.Deposits(Amount);
+                }
+                else{
+                    console.log("Transfered failed");
+                }
+                
+             }
+
+             FindAccount(AccNo){
+                let acc;
+                this.AccountList.forEach(Account => {
+                    if(Account.AccNo==AccNo){
+                        console.log(Account);
+                        acc= Account;
+                    }
+                });
+                return acc;
+             }
+        }
+
+        let bank = new Bank();
+         console.log(bank.AccountList);
+         console.log(bank.Transfer(101,102,33));
+
+        // console.log(bank.Deposits(101,1000));
+        // console.log(bank.Widthdrawl(102,500))
+
+    </script>
+</body>
+</html>

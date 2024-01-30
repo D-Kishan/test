@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank App</title>
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        body >div{
+            display: none;
+        }
+        button{
+            border: none;
+            background-color: rgb(81, 61, 237);
+            padding: 10px;
+            color: antiquewhite;
+            border-radius: 2px;
+        }
+        button:hover{
+            background-color:orange;
+        }
+
+        button:focus{
+            background-color:rgb(0, 255, 55);
+        }
+        #signUp{
+            justify-content: center;
+            flex-direction: column;
+            gap: 10px;
+        }
+        #AccountPage {
+            text-align: center;
+        }
+
+        .account-details {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin: auto;
+        }
+
+        .account-details div {
+            margin-bottom: 10px;
+        }
+
+        hr {
+            margin: 20px 0;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="staringPage" style="display: block;">
+        <button id="loginButton">Login</button>
+        <button id="signupButton">Sign In</button>
+    </div>
+    <div id="Login">
+        <label>User Account No :</label>
+        <input type="number" id="userInputAccNo">
+        <button id="loginSubmit">Login</button>
+    </div>
+    <div id="signUp">
+        <div>
+            <label>User Name:</label>
+            <input type="text" id="newUserName">
+        </div>
+        <div>
+            <label>Initial Deposit</label>
+            <input type="number" id="initialDeposit">
+        </div>
+        <button id="signupSubmit">Sign Up</button>
+    </div>
+
+    <div id="AccountPage">
+        <div class="account-details">
+            <div id="AccountName"></div>
+            <div id="AccountNumber"></div>
+            <div id="AccountAmount"></div>
+            <hr>
+            <label for="userInputAmountTo">Enter Amount:</label>
+            <input type="number" id="userInputAmountTo">
+            <br>
+            <button id="depositButton">Deposit</button>
+            <button id="withdrawButton">Withdraw</button>
+            <button id="logoutButton">Logout</button>
+        </div>
+
+    <script>
+        class Account {
+            constructor(name, AccNo, Amount) {
+                this.Name = name;
+                this.AccountNumber = AccNo;
+                this.Amount = Amount;
+            }
+
+            Deposit(amount) {
+                this.Amount = this.Amount + amount;
+            }
+
+            Withdraw(amount) {
+                if (this.Amount - amount >= 0) {
+                    this.Amount = this.Amount - amount;
+                    return true;
+                }
+                console.log("Withdrawal Failed!!");
+                return false;
+            }
+        }
+
+        class Bank {
+            constructor() {
+                this.currentLoginAccount = new Account("", 0, 0);
+                this.AccountList = [new Account("TestAcc", 100, 1000)];
+                this.AccountList.push(new Account("Pravin", 101, 1000));
+                this.AccountList.push(new Account("Naveen", 102, 1000));
+                this.AccountList.push(new Account("Sathish", 103, 1000));
+            }
+
+            FindAccount(AccountNo) {
+                return this.AccountList.find(account => account.AccountNumber == AccountNo);
+            }
+
+            Deposit(AccountNo, Amount) {
+                let acc = this.FindAccount(AccountNo);
+                if (acc) {
+                    acc.Deposit(Amount);
+                }
+            }
+
+            Withdraw(AccNo, Amount) {
+                let acc = this.FindAccount(AccNo);
+                if (acc) {
+                    acc.Withdraw(Amount);
+                }
+            }
+
+            Transfer(from, to, Amount) {
+                let fromAcc = this.FindAccount(from);
+                let ToAcc = this.FindAccount(to);
+                if (fromAcc && ToAcc && fromAcc.Withdraw(Amount)) {
+                    ToAcc.Deposit(Amount);
+                }
+            }
+        }
+
+        let sbi = new Bank();
+
+        let startingPage = document.getElementById("staringPage");
+        let loginpage = document.getElementById("Login");
+        let signuppage = document.getElementById("signUp");
+        let accPage = document.getElementById("AccountPage");
+
+        document.getElementById("loginButton").addEventListener("click", () => HideOrShow(loginpage, true));
+        document.getElementById("signupButton").addEventListener("click", () => HideOrShow(signuppage, true));
+        document.getElementById("loginSubmit").addEventListener("click", Login);
+        document.getElementById("signupSubmit").addEventListener("click", SignUp);
+        document.getElementById("depositButton").addEventListener("click", Deposit);
+        document.getElementById("withdrawButton").addEventListener("click", Withdraw);
+        document.getElementById("logoutButton").addEventListener("click", Logout);
+
+        function HideOrShow(page, isShow) {
+            if (isShow) {
+                startingPage.style.display = "none";
+                loginpage.style.display = "none";
+                signuppage.style.display = "none";
+                accPage.style.display = "none";
+                page.style.display = "flex";
+            } else {
+                page.style.display = "none";
+                startingPage.style.display = "flex";
+            }
+        }
+
+        function Login() {
+            let accNo = document.getElementById("userInputAccNo").value;
+            let acc = sbi.FindAccount(accNo);
+
+            if (acc) {
+                sbi.currentLoginAccount = acc;
+                DisplayAccountPage();
+            } else {
+                console.log("Account not found");
+            }
+        }
+
+        function SignUp() {
+            let userName = document.getElementById("newUserName").value;
+            let initialDeposit = parseInt(document.getElementById("initialDeposit").value);
+
+            if (isNaN(initialDeposit) || initialDeposit <= 0) {
+                console.log("Invalid initial deposit");
+                return;
+            }
+
+            let newAccNo = sbi.AccountList.length + 1; 
+            let newAccount = new Account(userName, newAccNo, initialDeposit);
+            sbi.AccountList.push(newAccount);
+
+            sbi.currentLoginAccount = newAccount;
+            DisplayAccountPage();
+        }
+
+        function DisplayAccountPage() {
+            HideOrShow(loginpage, false);
+            HideOrShow(signuppage, false);
+            let accName = document.getElementById("AccountName");
+            accName.textContent = sbi.currentLoginAccount.Name;
+            let accNu = document.getElementById("AccountNumber");
+            accNu.textContent = sbi.currentLoginAccount.AccountNumber;
+            let accAmount = document.getElementById("AccountAmount");
+            accAmount.textContent = sbi.currentLoginAccount.Amount;
+            HideOrShow(accPage, true);
+        }
+
+        function Deposit() {
+            let userAmount = document.getElementById("userInputAmountTo");
+            let amount = parseInt(userAmount.value);
+
+            if (!isNaN(amount) && amount > 0) {
+                sbi.currentLoginAccount.Deposit(amount);
+                UpdateAccountDetails();
+            } else {
+                console.log("Invalid amount");
+            }
+        }
+
+        function Withdraw() {
+            let userAmount = document.getElementById("userInputAmountTo");
+            let amount = parseInt(userAmount.value);
+
+            if (!isNaN(amount) && amount > 0) {
+                if (sbi.currentLoginAccount.Withdraw(amount)) {
+                    UpdateAccountDetails();
+                } else {
+                    console.log("Withdrawal failed");
+                }
+            } else {
+                console.log("Invalid amount");
+            }
+        }
+
+        function Logout() {
+            sbi.currentLoginAccount = new Account("", 0, 0);
+            HideOrShow(accPage, false);
+            HideOrShow(startingPage, true);
+        }
+
+        function UpdateAccountDetails() {
+            let accAmount = document.getElementById("AccountAmount");
+            accAmount.textContent = sbi.currentLoginAccount.Amount;
+        }
+    </script>
+</body>
+
+</html>
